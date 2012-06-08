@@ -1,0 +1,6 @@
+#!/bin/sh
+
+exec 2>&1
+ulimit -v 512000
+export REAL_SCRIPT_NAME=""
+exec /home/shish/bin/spawn-fcgi -n -s /tmp/fcgi-rh.sock -u shish -U www-data -d /home/shish/ratehereratenow.com/htdocs -- ../app/ratehere.py fastcgi

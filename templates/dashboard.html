@@ -1,0 +1,47 @@
+$def with(name, yays, nays, favs)
+
+<div class="row">
+	<div class="span6">
+		<h2>Favourites</h2>
+		<ul>
+		$for r in favs:
+			<li>
+				$r.content
+				<br><i>$shorten_datetime(r.date_posted) - <a href="#" onclick="setView($r.lat, $r.lon); return false;">View</a></i>
+			</li>
+		$#endfor
+		</ul>
+	</div>
+	<div class="span6">
+		<div id="map" class="mini" style="height: 200px; width: 100%;">
+			(Minimap goes here)
+		</div>
+	</div>
+</div>
+
+<p>&nbsp;
+
+<div class="row">
+	<div class="span6">
+		<h2>Yays</h2>
+		<ul>
+		$for r in yays:
+			<li>
+				$r.content
+				<br><i>$shorten_datetime(r.date_posted) - <a href="#" onclick="setView($r.lat, $r.lon); return false;">View</a></i>
+			</li>
+		$#endfor
+		</ul>
+	</div>
+	<div class="span6">
+		<h2>Nays</h2>
+		<ul>
+		$for r in nays:
+			<li>
+				$r.content
+				<br><i>$shorten_datetime(r.date_posted) - <a href="#" onclick="setView($r.lat, $r.lon); return false;">View</a></i>
+			</li>
+		$#endfor
+		</ul>
+	</div>
+</div>

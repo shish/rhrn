@@ -1,0 +1,17 @@
+$def with(name="", error="")
+
+<div class="cot_form cot_login">
+	<form method="POST" action="/dashboard/login">
+		$error
+		$if error:
+			<br>
+		<input type='text' name='name' placeholder="Username" value="$name" pattern="[A-Za-z0-9_-]+" required>
+		<br><input type='password' name='password' placeholder="Password" required>
+		<br><input class="btn btn-primary" type="submit" value="Log In">
+	</form>
+	<center>
+		<a href="/dashboard/new">Create New Account</a>
+		/
+		<a href="/dashboard/reset">Password Reset</a>
+	</center>
+</div>

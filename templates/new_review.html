@@ -1,0 +1,76 @@
+$def with (id, lat, lon)
+
+<form action="/new_review" method="POST" id="f$id">
+	<input type="hidden" name="lon" value="$lon">
+	<input type="hidden" name="lat" value="$lat">
+	<table class="form" style="width: 250px;">
+		<tr>
+			<td colspan="3" width="50%">
+				<label>
+					<img src="/static/img/happy.png">
+					<br><input type="radio" name="happy" value="true">
+				</label>
+			</td>
+			<td colspan="3" width="50%">
+				<label>
+					<img src="/static/img/sad.png">
+					<br><input type="radio" name="happy" value="false">
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="6">
+				<input type="text" name="comment" placeholder="Optional: add a comment">
+			</td>
+		</tr>
+		<tr class="advanced trio">
+			<td colspan="2" width="100">
+				<label>Quiet <input type="radio" name="volume" value="0.0"></label>
+			</td>
+			<td colspan="2">
+				<label><input type="radio" name="volume" value="0.5"></label>
+			</td>
+			<td colspan="2" width="100">
+				<label><input type="radio" name="volume" value="1.0"> Loud</label>
+			</td>
+		</tr>
+		<tr class="advanced trio">
+			<td colspan="2">
+				<label>Safe <input type="radio" name="danger" value="0.0"></label>
+			</td>
+			<td colspan="2">
+				<label><input type="radio" name="danger" value="0.5"></label>
+			</td>
+			<td colspan="2">
+				<label><input type="radio" name="danger" value="1.0"> Dangerous</label>
+			</td>
+		</tr>
+		<tr class="advanced trio">
+			<td colspan="2">
+				<label>Empty <input type="radio" name="crowds" value="0.0"></label>
+			</td>
+			<td colspan="2">
+				<label><input type="radio" name="crowds" value="0.5"></label>
+			</td>
+			<td colspan="2">
+				<label><input type="radio" name="crowds" value="1.0"> Crowded</label>
+			</td>
+		</tr>
+	$if session.user.name != "Anonymous":
+		<tr class="advanced">
+			<td colspan="6">
+				<label><input type="checkbox" name="anon"> Submit anonymously</label>
+			</td>
+		</tr>
+	$#endif
+		<tr>
+			<td colspan="3">
+				<input type="button" value="Rate this spot" onclick="submitReview('#f$id')">
+			</td>
+			<td colspan="3">
+				<input type="button" class="simple" value="Advanced" onclick="jQuery('.simple').hide(); jQuery('.advanced').show();">
+				<input type="button" class="advanced" value="Simple" onclick="jQuery('.advanced').hide(); jQuery('.simple').show();">
+			</td>
+		</tr>
+	</table>
+</form>
