@@ -15,7 +15,10 @@ function rhrn_init(div_name) {
 		map.setView(new L.LatLng(rhrn_initpos[0], rhrn_initpos[1]), 18);
 	}
 	else {
-		map.locate({setView: true});
+		setTimeout(function() {
+			loadReviews(map.getBounds());
+			map.locate({setView: true});
+		}, 1000);
 	}
 	map.on('load', function(e) {            loadReviews(map.getBounds()); });
 	map.on('dragend', function(e) {         loadReviews(map.getBounds()); });
@@ -37,6 +40,8 @@ function rhrn_init(div_name) {
 	var happyIcon = new FaceIcon("/static/img/happy.png");
 	var sadIcon = new FaceIcon("/static/img/sad.png");
 
+	var oldMarkers = [];
+	var newMarkers = [];
 	var markers = new L.LayerGroup();
 	map.addLayer(markers);
 
@@ -48,10 +53,17 @@ function rhrn_init(div_name) {
 		filter = $("#filter").val();
 
 		console.log("Loading reviews for "+bbox.toBBoxString());
-		markers.clearLayers();
+		newMarkers = [];
 		jQuery.getJSON("/review", {"bbox": bbox.toBBoxString(), "filter": filter}, function(e) {
-			console.log("Got results", e.data.length, "results");
+			console.log("Got", e.data.length, "results");
 			jQuery(e.data).each(function(idx, el) {
+				// rather than clear-all and re-add-all, keep track of what's
+				// currently on-screen and re-use it if possible
+				if(oldMarkers.hasOwnProperty("i"+el.id)) {
+					newMarkers["i"+el.id] = oldMarkers["i"+el.id];
+					return;
+				}
+
 				var m = new L.Marker(new L.LatLng(el.lat, el.lon));
 				m.setIcon(el.happy ? happyIcon : sadIcon);
 				var comment = (el.content ? el.content : "(No comment)");
@@ -81,9 +93,21 @@ function rhrn_init(div_name) {
 						"</td>"+
 					"</tr></table>"
 				);
+				newMarkers["i"+el.id] = m;
 				markers.addLayer(m);
 			});
-	//		jQuery("#controls").html(e);
+
+			//console.log("current", oldMarkers);
+			//console.log("new", newMarkers);
+			for(var id in oldMarkers) {
+				if(oldMarkers.hasOwnProperty(id)) {
+					if(!newMarkers.hasOwnProperty(id)) {
+						markers.removeLayer(oldMarkers[id]);
+						delete oldMarkers[id];
+					}
+				}
+			}
+			oldMarkers = newMarkers;
 		});
 	}
 
