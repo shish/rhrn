@@ -19,6 +19,9 @@ $def with(lat, lon)
 			<!--What's cool in your neighbourhood?-->
 			What's it like where you are?
 		</div>
+		<div id="search">
+			<input type="text" placeholder="Search for a location" id="loc_search" style="width: 30em;">
+		</div>
 		<div id="links">
 		$if session.user.name == "Anonymous":
 			<a href="/dashboard/login">Log In</a> /
@@ -47,5 +50,21 @@ var rhrn_initpos = [$lat, $lon];
 		<script src="/static/leaflet/dist/leaflet-src.js"></script>
 		<script src="/static/js/jquery.js"></script>
 		<script src="/static/js/rhrn.js"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=places"
+
+		      type="text/javascript"></script>
+
+
+		<script>
+		var input = document.getElementById('loc_search');
+		var autocomplete = new google.maps.places.Autocomplete(input);
+		google.maps.event.addListener(autocomplete, 'place_changed', function() {
+			var place = autocomplete.getPlace();
+			var loc = place.geometry.location;
+			var lat = loc.lat();
+			var lng = loc.lng();
+			setView(lat, lng);
+		});
+		</script>
 	</body>
 </html>

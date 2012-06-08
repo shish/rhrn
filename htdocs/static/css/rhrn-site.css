@@ -54,8 +54,8 @@ INPUT {
 .form INPUT[type="submit"] {
 	width: 100%;
 }
-H1 {
-	margin-bottom: 0px;
+#title H1 {
+	margin: 0px;
 }
 
 #map.full {
@@ -66,7 +66,7 @@ H1 {
 	right: 0px;
 	z-index: 0;
 }
-#title, #links {
+#title, #links, #search {
 	position: absolute;
 	z-index: 1;
 	background: #fff;
@@ -76,6 +76,12 @@ H1 {
 #title {
 	top: 0px;
 	left: 50px;
+	border-radius: 0px 0px 8px 8px;
+	text-align: center;
+}
+#search {
+	top: 0px;
+	right: 50px;
 	border-radius: 0px 0px 8px 8px;
 	text-align: center;
 }
