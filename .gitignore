@@ -4,3 +4,5 @@ logs/
 app/lib
 app/flup
 app/web
+htdocs/cache
+run/supervise
