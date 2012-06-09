@@ -92,11 +92,11 @@ class about:
 class review:
     def GET(self, id=None):
         if id == "new":
+            import time
+            i = web.input(lat="0", lon="0", id="r"+str(time.time()))
             if web.ctx.host.startswith("m."):
-                return render_mobile.new_review()
+                return render_mobile.new_review(i.id, i.lat, i.lon)
             else:
-                import time
-                i = web.input(lat="0", lon="0", id="r"+str(time.time()))
                 return render_bare.new_review(i.id, i.lat, i.lon)
         if id == None:
             if web.ctx.host.startswith("m."):
@@ -144,11 +144,15 @@ class review:
             i.happy=="true", float(i.lon), float(i.lat), i.comment,
             i.volume, i.danger, i.crowds
         )
-        return json.write({
-            "status": "ok",
-            "message": None,
-            "data": None
-        })
+
+        if web.ctx.host.startswith("m."):
+            raise web.seeother("/")
+        else:
+            return json.write({
+                "status": "ok",
+                "message": None,
+                "data": None
+            })
 
     def DELETE(self, id):
         if session.user.name == "Anonymous":
@@ -214,6 +218,11 @@ class dashboard_login:
         raise web.seeother("/")
 
 class dashboard_logout:
+    def GET(self):
+        # FIXME: used by mobile
+        session.user = User(model.get_user(name="Anonymous"))
+        raise web.seeother("/")
+
     def POST(self):
         session.user = User(model.get_user(name="Anonymous"))
         raise web.seeother("/")

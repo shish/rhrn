@@ -24,17 +24,43 @@ $def with (page)
 .advanced {
 	display: none;
 }
+.row_b2 .ui-radio {
+	width: 49%;
+}
+.row_b3 .ui-radio {
+	width: 33%;
+}
+.row_b2 .ui-btn,
+.row_b3 .ui-btn {
+	width: 100%;
+}
 		</style>
 <script>
-function onSuccess(pos) {
-	window.location.href = "http://m.ratehereratenow.com/review?lon="+pos.coords.longitude+"&lat="+pos.coords.latitude;
-}
-function onError(msg) {
-	alert("Unable to find location: "+msg);
+function newReview() {
+	if(navigator.geolocation) {
+		navigator.geolocation.getCurrentPosition(
+			function(pos) {
+				window.location.href = "http://m.ratehereratenow.com/review/new?lon="+pos.coords.longitude+"&lat="+pos.coords.latitude;
+			},
+			function(msg) {
+				alert("Unable to find location: "+msg);
+			}
+		);
+	}
+	else {
+		alert("Unable to find location: GPS not supported");
+	}
 }
 function findLocal() {
 	if(navigator.geolocation) {
-		navigator.geolocation.getCurrentPosition(onSuccess, onError);
+		navigator.geolocation.getCurrentPosition(
+			function(pos) {
+				window.location.href = "http://m.ratehereratenow.com/review?lon="+pos.coords.longitude+"&lat="+pos.coords.latitude;
+			},
+			function(msg) {
+				alert("Unable to find location: "+msg);
+			}
+		);
 	}
 	else {
 		alert("Unable to find location: GPS not supported");
