@@ -17,7 +17,7 @@ $def with(lat, lon)
 		<div id="title">
 			<h1>Rate Here, Rate Now</h1>
 			<!--What's cool in your neighbourhood?-->
-			What's it like where you are?
+			<span id="tagline">What's it like where you are?</span>
 		</div>
 		<div id="search">
 			<input type="text" placeholder="Search for a location" id="loc_search" style="width: 30em;">
@@ -83,6 +83,16 @@ var rhrn_initpos = [$lat, $lon];
 					setHeat(null);
 				}
 			});
+
+			var taglines = [
+				"What's it like where you are?",
+				"What's cool in your neighbourhood?",
+				"Click to add your own nano-reviews!"
+			];
+			var tagline_id = 0;
+			setInterval(function() {
+				jQuery("#tagline").html(taglines[++tagline_id % taglines.length]);
+			}, 15000);
 		});
 		</script>
 	</body>
