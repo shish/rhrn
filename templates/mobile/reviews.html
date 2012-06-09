@@ -1,4 +1,4 @@
-$def with(rs)
+$def with(rs, lon, lat)
 <div data-role="page" id="page-review-list">
 	<div data-role="header">
 		<a href="/" data-rel="back">Back</a>
@@ -8,8 +8,16 @@ $def with(rs)
 		<ul data-role="listview" data-inset="true">
 		$for r in rs:
 			<li>
+			<!--
+			$if r.happy:
+				<img src="/static/img/happy.png" class="ul-li-icon">
+			$else:
+				<img src="/static/img/sad.png" class="ul-li-icon">
+			$#endif
+			-->
 			$r.content
-			<br><i>$r.dist - $shorten_datetime(r.date_posted)</i>
+			<br><i>$ll_to_metric(lon, lat, r.lon, r.lat) - $r.writer - $shorten_datetime(r.date_posted)</i>
+			</li>
 		$#endif
 		</ul>
 	</div><!-- /content -->

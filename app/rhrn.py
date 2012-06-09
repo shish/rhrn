@@ -63,7 +63,8 @@ render_mobile = web.template.render('../templates/mobile', base='base', globals=
     'shorten_datetime': shorten_datetime,
     'get_domain': get_domain,
     'flash_clear': flash_clear,
-    'urlquote': web.urlquote
+    'urlquote': web.urlquote,
+    'll_to_metric': ll_to_metric
 })
 render = web.template.render('../templates', base='base', globals={
     'session': session,
@@ -102,7 +103,7 @@ class review:
             if web.ctx.host.startswith("m."):
                 i = web.input(lon=None, lat=None)
                 rs = model.get_reviews_point(i.lon, i.lat)
-                return render_mobile.reviews(rs)
+                return render_mobile.reviews(rs, float(i.lon), float(i.lat))
 
             i = web.input(bbox="0,0,0,0", filter=None)
 
