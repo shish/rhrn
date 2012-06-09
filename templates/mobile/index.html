@@ -1,0 +1,56 @@
+<div data-role="page" id="top">
+	<div data-role="header">
+		<h1>RHRN</h1>
+	</div><!-- /header -->
+	<div data-role="content">	
+		<ul data-role="listview" data-inset="true">
+			<li><a href="/review/new">Review This Spot</a></li>
+			<li><a href="#" onclick="findLocal();">Read Nearby Reviews</a></li>
+		$if session.user.name == "Anonymous":
+			<li><a href="#login">Log In</a></li>
+			<li><a href="#create">Create Account</a></li>
+		$else:
+			<li><a href="/dashboard/logout">Log Out</a></li>
+		$#endif
+		</ul>
+	</div><!-- /content -->
+	<!--
+	<div data-role="footer">
+		<h1>Logged in as $session.user.name</h1>
+	</div>
+	-->
+</div><!-- /page -->
+
+<div data-role="page" id="login">
+	<div data-role="header">
+		<a href="/" data-rel="back">Back</a>
+		<h1>Log In</h1>
+	</div><!-- /header -->
+	<div data-role="content">	
+		<form action="/dashboard/login" method="POST">
+			<ul data-role="listview" data-inset="true">
+				<li><input type="text" name="name" placeholder="Username"></li>
+				<li><input type="password" name="password" placeholder="Password"></li>
+				<li><input type="submit" value="Log In"></li>
+			</ul>
+		</form>
+	</div><!-- /content -->
+</div><!-- /page -->
+
+<div data-role="page" id="create">
+	<div data-role="header">
+		<a href="/" data-rel="back">Back</a>
+		<h1>New Account</h1>
+	</div><!-- /header -->
+	<div data-role="content">	
+		<form action="/dashboard/new" method="POST">
+			<ul data-role="listview" data-inset="true">
+				<li><input type="text" name="name" placeholder="Username"></li>
+				<li><input type="text" name="email" placeholder="Email"></li>
+				<li><input type="password" name="password1" placeholder="Password"></li>
+				<li><input type="password" name="password2" placeholder="Repeat Password"></li>
+				<li><input type="submit" value="Create"></li>
+			</ul>
+		</form>
+	</div><!-- /content -->
+</div><!-- /page -->

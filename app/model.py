@@ -81,6 +81,14 @@ def get_reviews(bbox=None, writer=None, happy=None, favourite=None, notwriter=No
         vars=locals()
     )
 
+def get_reviews_point(lon, lat):
+    return db.select('rh_review',
+        what="*, sqrt(pow(lon-$lon, 2) + pow(lat-$lat, 2)) AS dist",
+        order="dist ASC",
+        limit=50,
+        vars=locals()
+    )
+
 def get_review(id):
     l = db.select('rh_review',
         where="id=$id",

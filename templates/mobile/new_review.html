@@ -1,0 +1,80 @@
+<div data-role="page" id="review">
+	<div data-role="header">
+		<a href="/" data-rel="back">Back</a>
+		<h1>New Review</h1>
+		<a href="#" onclick="jQuery('.simple').hide(); jQuery('.advanced').show();">Advanced</a>
+	</div><!-- /header -->
+	<div data-role="content">
+		<!--
+		<fieldset data-role="controlgroup" data-type="horizontal">
+			<label>Simple <input type="radio" onclick="jQuery('.advanced').hide(); jQuery('.simple').show();" checked></label>
+			<label>Advanced <input type="radio" onclick="jQuery('.simple').hide(); jQuery('.advanced').show();"></label>
+		</fieldset>
+		-->
+
+		<form action="/review" method="POST" id="review_form">
+			<input type="hidden" name="lon" id="rlon" value="">
+			<input type="hidden" name="lat" id="rlat" value="">
+
+			<div id="loc_status">Finding current location...</div>
+
+			<fieldset data-role="controlgroup" data-type="horizontal">
+				<label>
+					<img src="/static/img/happy.png">
+					<br><input type="radio" name="happy" value="true" required>
+				</label>
+				<label>
+					<img src="/static/img/sad.png">
+					<br><input type="radio" name="happy" value="false" required>
+				</label>
+			</fieldset>
+
+			<input type="text" name="comment" placeholder="Optional: add a comment">
+
+			<fieldset data-role="controlgroup" data-type="horizontal" class="advanced">
+				<label>Quiet <input type="radio" name="volume" value="0.0"></label>
+				<label><input type="radio" name="volume" value="0.5">&nbsp;</label>
+				<label><input type="radio" name="volume" value="1.0"> Loud</label>
+			</fieldset>
+			<fieldset data-role="controlgroup" data-type="horizontal" class="advanced">
+				<label>Safe <input type="radio" name="danger" value="0.0"></label>
+				<label><input type="radio" name="danger" value="0.5">&nbsp;</label>
+				<label><input type="radio" name="danger" value="1.0"> Dangerous</label>
+			</fieldset>
+			<fieldset data-role="controlgroup" data-type="horizontal" class="advanced">
+				<label>Empty <input type="radio" name="crowds" value="0.0"></label>
+				<label><input type="radio" name="crowds" value="0.5">&nbsp;</label>
+				<label><input type="radio" name="crowds" value="1.0"> Crowded</label>
+			</fieldset>
+			<!--
+		$if session.user.name != "Anonymous":
+			<label><input type="checkbox" name="anon"> Submit anonymously</label>
+		$#endif
+			-->
+
+			<input id="submit" type="Submit" value="Rate this spot">
+		</form>
+	</div><!-- /content -->
+
+	<script>
+	$$(function() {
+		function onSuccess(pos) {
+			$$("#rlon").val(pos.coords.longitude);
+			$$("#rlat").val(pos.coords.latitude);
+			$$("#loc_status").html("Location: "+pos.coords.longitude+", "+pos.coords.latitude);
+		}
+		function onError(msg) {
+			$$("#loc_status").html("Unable to find location: "+msg);
+			$$("#submit").attr("disabled", "disabled");
+		}
+
+		if(navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(onSuccess, onError);
+		}
+		else {
+			$$("#loc_status").html("Unable to find location: GPS not supported");
+			$$("#submit").attr("disabled", "disabled");
+		}
+	});
+	</script>
+</div><!-- /page -->

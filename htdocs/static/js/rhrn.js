@@ -7,10 +7,10 @@ function rhrn_init(div_name) {
 
 	// create a CloudMade tile layer
 	//var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/YOUR-API-KEY/997/256/{z}/{x}/{y}.png',
-	var cloudmadeUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-		cloudmade = new L.TileLayer(cloudmadeUrl, {maxZoom: 18});
+	var cloudmade = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18});
 
 	map.addLayer(cloudmade);
+
 	if(window.rhrn_initpos && rhrn_initpos[0] && rhrn_initpos[1]) {
 		map.setView(new L.LatLng(rhrn_initpos[0], rhrn_initpos[1]), 18);
 	}
@@ -187,9 +187,23 @@ function rhrn_init(div_name) {
 		refreshMap();
 	}
 
+	var heat = null;
+	function setHeat(type) {
+		if(heat) map.removeLayer(heat);
+
+		if(type == "happiness") {
+			heat = new L.TileLayer('/tiles/happiness/{z}/{x}/{y}.png', {maxZoom: 18});
+			map.addLayer(heat);
+		}
+		else {
+			heat = null;
+		}
+	}
+
 	window.submitReview = submitReview;
 	window.newReview = newReview;
 	window.delReview = delReview;
 	window.setView = setView;
 	window.refreshMap = refreshMap;
+	window.setHeat = setHeat;
 }

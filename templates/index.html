@@ -39,8 +39,17 @@ $def with(lat, lon)
 				<option value="notme">Everyone else's</option>
 			$#endif
 			</select> / 
-			<a href="https://twitter.com/share" data-text="Nano-reviews for your area; rate here, rate now -" data-related="shish2k:Site programmer" class="twitter-share-button" data-lang="en">Tweet</a>
-			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+			<span style="position: relative; top: 5px;">
+				<a href="https://twitter.com/share" data-text="Nano-reviews for your area; rate here, rate now -" data-related="shish2k:Site programmer" class="twitter-share-button" data-lang="en">Tweet</a>
+				<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+			</span>
+		$if session.user.name == "Shish":
+			/
+			<label>
+				<input type="checkbox" id="heat_toggle">
+				Heat Map
+			</label>
+		$#endif
 		</div>
 
 		<script>
@@ -50,10 +59,7 @@ var rhrn_initpos = [$lat, $lon];
 		<script src="/static/leaflet/dist/leaflet-src.js"></script>
 		<script src="/static/js/jquery.js"></script>
 		<script src="/static/js/rhrn.js"></script>
-		<script src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=places"
-
-		      type="text/javascript"></script>
-
+		<script src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=places" type="text/javascript"></script>
 
 		<script>
 		var input = document.getElementById('loc_search');
@@ -64,6 +70,18 @@ var rhrn_initpos = [$lat, $lon];
 			var lat = loc.lat();
 			var lng = loc.lng();
 			setView(lat, lng);
+		});
+
+		jQuery(function() {
+			jQuery("#heat_toggle").change(function(e) {
+				var val = jQuery(this).is(":checked");
+				if(val) {
+					setHeat("happiness");
+				}
+				else {
+					setHeat(null);
+				}
+			});
 		});
 		</script>
 	</body>

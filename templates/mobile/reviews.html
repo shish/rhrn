@@ -1,0 +1,16 @@
+$def with(rs)
+<div data-role="page" id="page-review-list">
+	<div data-role="header">
+		<a href="/" data-rel="back">Back</a>
+		<h1>Reviews</h1>
+	</div><!-- /header -->
+	<div data-role="content">	
+		<ul data-role="listview" data-inset="true">
+		$for r in rs:
+			<li>
+			$r.content
+			<br><i>$r.dist - $shorten_datetime(r.date_posted)</i>
+		$#endif
+		</ul>
+	</div><!-- /content -->
+</div><!-- /page -->

@@ -3,6 +3,11 @@
 import web
 import model
 import json
+import math
+import Image
+import colorsys
+import StringIO
+import os
 from cotutil import *
 
 web.config.debug = True
@@ -20,6 +25,8 @@ urls = (
     '/dashboard/login', 'dashboard_login',
     '/dashboard/logout', 'dashboard_logout',
     '/dashboard/reset', 'dashboard_reset',
+
+    '/tiles/happiness/(.*)/(.*)/(.*).png', 'tiles',
 
     '', ''
 )
@@ -50,6 +57,14 @@ render_bare = web.template.render('../templates', globals={
     'flash_clear': flash_clear,
     'urlquote': web.urlquote
 })
+render_mobile = web.template.render('../templates/mobile', base='base', globals={
+    'session': session,
+    'shorten_url': shorten_url,
+    'shorten_datetime': shorten_datetime,
+    'get_domain': get_domain,
+    'flash_clear': flash_clear,
+    'urlquote': web.urlquote
+})
 render = web.template.render('../templates', base='base', globals={
     'session': session,
     'shorten_url': shorten_url,
@@ -63,8 +78,11 @@ render = web.template.render('../templates', base='base', globals={
 
 class index:
     def GET(self):
-        i = web.input(lat=None, lon=None)
-        return render_bare.index(i.lat, i.lon)
+        if web.ctx.host.startswith("m."):
+            return render_mobile.index()
+        else:
+            i = web.input(lat=None, lon=None)
+            return render_bare.index(i.lat, i.lon)
 
 class about:
     def GET(self, page="about"):
@@ -74,10 +92,18 @@ class about:
 class review:
     def GET(self, id=None):
         if id == "new":
-            import time
-            i = web.input(lat="0", lon="0", id="r"+str(time.time()))
-            return render_bare.new_review(i.id, i.lat, i.lon)
+            if web.ctx.host.startswith("m."):
+                return render_mobile.new_review()
+            else:
+                import time
+                i = web.input(lat="0", lon="0", id="r"+str(time.time()))
+                return render_bare.new_review(i.id, i.lat, i.lon)
         if id == None:
+            if web.ctx.host.startswith("m."):
+                i = web.input(lon=None, lat=None)
+                rs = model.get_reviews_point(i.lon, i.lat)
+                return render_mobile.reviews(rs)
+
             i = web.input(bbox="0,0,0,0", filter=None)
 
             if i.filter == "my":
@@ -220,6 +246,73 @@ class dashboard_reset:
         )
 
         return render.dashboard_reset_sent()
+
+def num2deg(xtile, ytile, zoom):
+    n = 2.0 ** zoom
+    lon_deg = xtile / n * 360.0 - 180.0
+    lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * ytile / n)))
+    lat_deg = math.degrees(lat_rad)
+    return (lat_deg, lon_deg)
+
+class tiles:
+    def GET(self, zoom, x, y):
+        cache_file = "cache/%s-%s-%s.png" % (zoom, x, y)
+
+        if os.path.exists(cache_file):
+            return file(cache_file).read()
+
+        (lat0, lon0) = num2deg(int(x)-1, int(y)-1, int(zoom))
+        (lat1, lon1) = num2deg(int(x),   int(y),   int(zoom))
+        (lat2, lon2) = num2deg(int(x)+1, int(y)+1, int(zoom))
+        (lat3, lon3) = num2deg(int(x)+2, int(y)+2, int(zoom))
+        (latd, lond) = (abs(lat1-lat2), abs(lon1-lon2))
+
+        rs = list(model.get_reviews(bbox=[
+            lon0, lat0,
+            lon3, lat3
+        ]))
+
+        im = Image.new('RGBA', (256, 256))
+
+        if rs:
+            for x in range(0, 256):
+                for y in range(0, 256):
+                    lat = lat1 + (lat2-lat1) * y/256
+                    lon = lon1 + (lon2-lon1) * x/256
+                    goodness = 0
+                    badness = 0
+                    for r in rs:
+                        d = math.sqrt(math.pow(lat-r.lat, 2) + math.pow(lon-r.lon, 2))
+                        if d < 0.001:
+                            if r.happy:
+                                goodness = goodness + (0.001 - d) * 1000
+                            else:
+                                badness = badness + (0.001 - d) * 1000
+                    good_hue = 2.0/6
+                    bad_hue = 0.0/6
+                    mid = (good_hue + bad_hue) / 2
+                    if goodness - badness == 0:
+                        hue = mid
+                        alp = 0
+                    else:
+                        ratio = (goodness - badness) / (goodness + badness)
+                        hue = mid + mid * ratio
+                        alp = 63 * min(1, max(goodness, badness))
+                    sat = 1
+                    val = 1
+                    (r, g, b) = colorsys.hsv_to_rgb(hue, sat, val)
+                    im.putpixel(
+                        (x, y),
+                        (r*256, g*256, b*256, alp)
+                        #(x, y, x, y)
+                    )
+
+        buf = StringIO.StringIO()
+        im.save(buf, format= 'PNG')
+
+        file(cache_file, "w").write(buf.getvalue())
+
+        return buf.getvalue()
 
 if __name__ == "__main__":
     app.run()
