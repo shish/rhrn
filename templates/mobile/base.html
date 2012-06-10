@@ -3,14 +3,17 @@ $def with (page)
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>Rate Here, Rate Now.</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1"> 
+		<title>Rate Here, Rate Now</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+		<meta name="description" content="Nano-reviews of everything, everywhere">
+		<meta name="author" content="Shish">
 
 		<link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.css" />
-		<link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0/jquery.mobile.structure-1.1.0.min.css" />
+		<link rel="stylesheet" href="/static/css/rhrn-site.css" />
 
 		<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
 		<script src="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js"></script>
+		<script src="/static/js/rhrn.js"></script>
 
 		<link rel="shortcut icon" href="/static/ico/favicon.ico">
 		<!--
@@ -19,54 +22,6 @@ $def with (page)
 		<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/static/ico/apple-touch-icon-72-precomposed.png">
 		<link rel="apple-touch-icon-precomposed" href="/static/ico/apple-touch-icon-57-precomposed.png">
 		-->
-
-		<style>
-.advanced {
-	display: none;
-}
-.row_b2 .ui-radio {
-	width: 49%;
-}
-.row_b3 .ui-radio {
-	width: 33%;
-}
-.row_b2 .ui-btn,
-.row_b3 .ui-btn {
-	width: 100%;
-}
-		</style>
-<script>
-function newReview() {
-	if(navigator.geolocation) {
-		navigator.geolocation.getCurrentPosition(
-			function(pos) {
-				window.location.href = "http://m.ratehereratenow.com/review/new?lon="+pos.coords.longitude+"&lat="+pos.coords.latitude;
-			},
-			function(msg) {
-				alert("Unable to find location: "+msg);
-			}
-		);
-	}
-	else {
-		alert("Unable to find location: GPS not supported");
-	}
-}
-function findLocal() {
-	if(navigator.geolocation) {
-		navigator.geolocation.getCurrentPosition(
-			function(pos) {
-				window.location.href = "http://m.ratehereratenow.com/review?lon="+pos.coords.longitude+"&lat="+pos.coords.latitude;
-			},
-			function(msg) {
-				alert("Unable to find location: "+msg);
-			}
-		);
-	}
-	else {
-		alert("Unable to find location: GPS not supported");
-	}
-}
-</script>
 	</head>
 	<body>
 		$:page

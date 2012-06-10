@@ -207,3 +207,35 @@ function rhrn_init(div_name) {
 	window.refreshMap = refreshMap;
 	window.setHeat = setHeat;
 }
+
+function newReview() {
+	if(navigator.geolocation) {
+		navigator.geolocation.getCurrentPosition(
+			function(pos) {
+				window.location.href = "http://m.ratehereratenow.com/review/new?lon="+pos.coords.longitude+"&lat="+pos.coords.latitude;
+			},
+			function(msg) {
+				alert("Unable to find location: "+msg);
+			}
+		);
+	}
+	else {
+		alert("Unable to find location: GPS not supported");
+	}
+}
+
+function findLocal() {
+	if(navigator.geolocation) {
+		navigator.geolocation.getCurrentPosition(
+			function(pos) {
+				window.location.href = "http://m.ratehereratenow.com/review?lon="+pos.coords.longitude+"&lat="+pos.coords.latitude;
+			},
+			function(msg) {
+				alert("Unable to find location: "+msg);
+			}
+		);
+	}
+	else {
+		alert("Unable to find location: GPS not supported");
+	}
+}

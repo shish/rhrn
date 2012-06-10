@@ -1,7 +1,12 @@
 $def with(lat, lon)
-<html>
+<!DOCTYPE html>
+<html lang="en">
 	<head>
-		<title>Rate Here, Rate Now.</title>
+		<meta charset="utf-8">
+		<title>Rate Here, Rate Now</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Nano-reviews of everything, everywhere">
+		<meta name="author" content="Shish">
 
 		<link rel="stylesheet" href="/static/leaflet/dist/leaflet.css" />
 		<!--[if lte IE 8]>
@@ -15,9 +20,9 @@ $def with(lat, lon)
 	<body onload="rhrn_init('map');">
 		<div id="map" class="full"></div>
 		<div id="title">
-			<h1>Rate Here, Rate Now</h1>
+			<h1>&nbsp;Rate Here, Rate Now&nbsp;</h1>
 			<!--What's cool in your neighbourhood?-->
-			<span id="tagline">What's it like where you are?</span>
+			<span id="tagline">Click the map to add your own nano-reviews</span>
 		</div>
 		<div id="search">
 			<input type="text" placeholder="Search for a location" id="loc_search" style="width: 30em;">
@@ -30,6 +35,7 @@ $def with(lat, lon)
 			<img src="$session.user.get_avatar(14)"> <a href="/dashboard">$session.user.name</a> /
 		$#endif
 			<a href="/about">About RHRN</a> /
+			<a href="http://m.ratehereratenow.com">Mobile view</a> /
 			Filter:
 			<select id="filter" onchange="refreshMap();">
 				<option value="all">All reviews</option>
@@ -42,8 +48,7 @@ $def with(lat, lon)
 			<span style="position: relative; top: 5px;">
 				<a href="https://twitter.com/share" data-text="Nano-reviews for your area; rate here, rate now -" data-related="shish2k:Site programmer" class="twitter-share-button" data-lang="en">Tweet</a>
 				<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-			</span> /
-			<a href="http://m.ratehereratenow.com">Mobile view</a>
+			</span>
 		$if session.user.name == "Shish":
 			/
 			<label>
@@ -85,9 +90,10 @@ var rhrn_initpos = [$lat, $lon];
 			});
 
 			var taglines = [
+				"Click the map to add your own nano-reviews",
 				"What's it like where you are?",
-				"What's cool in your neighbourhood?",
 				"Click to add your own nano-reviews!"
+				"What's cool in your neighbourhood?",
 			];
 			var tagline_id = 0;
 			setInterval(function() {
