@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS cot_session CASCADE;
 
 CREATE TABLE rh_user (
 	name TEXT UNIQUE NOT NULL PRIMARY KEY,
-	password CHAR(40) NOT NULL,
+	password TEXT NOT NULL,
 	email TEXT UNIQUE NOT NULL
 );
 CREATE TABLE rh_review (
