@@ -1,11 +1,11 @@
 $def with(rs, lon, lat)
 <div data-role="page" id="page-review-list">
 	<div data-role="header">
-		<a href="/" data-rel="back">Back</a>
+		<a href="/" data-icon="back" data-rel="back">Back</a>
 		<h1>Reviews</h1>
 	</div><!-- /header -->
 	<div data-role="content">	
-		<ul data-role="listview" data-inset="true">
+		<ul data-role="listview" data-inset="true" data-filter="true">
 		$for r in rs:
 			<li>
 			<!--
