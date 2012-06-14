@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import web
+from webutil import *
 import model
 import json
 import math
@@ -8,7 +9,6 @@ import Image
 import colorsys
 import StringIO
 import os
-from cotutil import *
 
 web.config.debug = True
 
@@ -34,8 +34,32 @@ app = web.application(urls, globals())
 app.add_processor(override_method)
 
 
+class User:
+    def __init__(self, row):
+        self.name = row.name
+        self.password = row.password
+        self.email = row.email
+        self.avatar = "http://www.gravatar.com/avatar/"+hashlib.md5(row.email).hexdigest()
+
+    def get_avatar(self, size):
+        return "http://www.gravatar.com/avatar/"+hashlib.md5(self.email).hexdigest()+"?s="+str(size)
+
+
+class Review:
+    def __init__(self, row):
+        self.row = row
+
+    def dict(self):
+        d = dict(self.row)
+        del d["writer_ip"]
+        d["avatar"] = User(model.get_user(d["writer"])).avatar
+        d["date_posted"] = shorten_datetime(d["date_posted"])
+        return d
+
+
 if web.config.get('_session') is None:
-    session = web.session.Session(app, web.session.DBStore(model.db, 'cot_session'), {
+    import rediswebpy
+    session = DefaultingSession(app, rediswebpy.RedisStore(prefix='session:rhrn:'), {
         'user': User(model.get_user(name="Anonymous")),
         'flash': [],
     })
@@ -122,7 +146,7 @@ class review:
 
             bbox = [float(n) for n in i.bbox.split(",")]
             rs = model.get_reviews(bbox=bbox, writer=writer, notwriter=notwriter)
-            return json.write({
+            return json.dumps({
                 "status": "ok",
                 "message": None,
                 "data": [Review(r).dict() for r in rs]
@@ -149,7 +173,7 @@ class review:
         if web.ctx.host.startswith("m."):
             raise web.seeother("/")
         else:
-            return json.write({
+            return json.dumps({
                 "status": "ok",
                 "message": None,
                 "data": None
@@ -162,7 +186,7 @@ class review:
         r = model.get_review(id)
         if r and (session.user.name == r.writer or session.user.name == "Shish"):
             model.del_review(id)
-            return json.write({
+            return json.dumps({
                 "status": "ok",
                 "message": None,
                 "data": None

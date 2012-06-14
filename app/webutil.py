@@ -3,8 +3,7 @@ import web
 import hashlib
 import random
 import re
-import model
-import math
+import bcrypt
 
 
 def override_method(handler):
@@ -12,31 +11,27 @@ def override_method(handler):
     return handler()
 
 
-class User:
-    def __init__(self, row):
-        self.name = row.name
-        self.password = row.password
-        self.email = row.email
-        self.avatar = "http://www.gravatar.com/avatar/"+hashlib.md5(row.email).hexdigest()
+class DefaultingSession(web.session.Session):
+    def _save(self):
+        current_values = dict(self)
+        del current_values['session_id']
+        del current_values['ip']
 
-    def get_avatar(self, size):
-        return "http://www.gravatar.com/avatar/"+hashlib.md5(self.email).hexdigest()+"?s="+str(size)
-
-
-class Review:
-    def __init__(self, row):
-        self.row = row
-
-    def dict(self):
-        d = dict(self.row)
-        del d["writer_ip"]
-        d["avatar"] = User(model.get_user(d["writer"])).avatar
-        d["date_posted"] = shorten_datetime(d["date_posted"])
-        return d
+        cookie_name = self._config.cookie_name
+        cookie_domain = self._config.cookie_domain
+        if not self.get('_killed') and current_values != self._initializer:
+            web.setcookie(cookie_name, self.session_id, domain=cookie_domain)
+            self.store[self.session_id] = dict(self)
+        else:
+            if web.cookies().get(cookie_name):
+                web.setcookie(cookie_name, self.session_id, expires=-1, domain=cookie_domain)
 
 
-def hashpw(pw):
-    return hashlib.sha1("s4l7y-w4l7y\x00"+pw).hexdigest()
+def hashpw(password):
+    return bcrypt.hashpw(password, bcrypt.gensalt())
+
+def pwmatch(password, digest):
+    return bcrypt.hashpw(password, digest) == digest
 
 
 def generate_password():
