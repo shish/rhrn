@@ -2,8 +2,17 @@ import web
 import time
 import hashlib
 import cotutil
+import ConfigParser
 
-db = web.database(dbn="postgres", db="ratehere", user="ratehere", pw="r4t00t13")
+config = ConfigParser.SafeConfigParser()
+config.read("../app/rhrn.cfg")
+
+db = web.database(
+    dbn  = config.get("database", "dbn"),
+    db   = config.get("database", "db"),
+    user = config.get("database", "user"),
+    pw   = config.get("database", "pw")
+)
 
 
 # ============================================================================
