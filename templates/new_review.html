@@ -65,11 +65,11 @@ $def with (id, lat, lon)
 	$#endif
 		<tr>
 			<td colspan="3">
-				<input type="button" value="Rate this spot" onclick="submitReview('#f$id')">
+				<input type="button" class="btn btn-primary" value="Rate this spot" onclick="submitReview('#f$id')">
 			</td>
 			<td colspan="3">
-				<input type="button" class="simple" value="Advanced" onclick="jQuery('.simple').hide(); jQuery('.advanced').show();">
-				<input type="button" class="advanced" value="Simple" onclick="jQuery('.advanced').hide(); jQuery('.simple').show();">
+				<input type="button" class="btn simple" value="Advanced" onclick="jQuery('.simple').hide(); jQuery('.advanced').show();">
+				<input type="button" class="btn advanced" value="Simple" onclick="jQuery('.advanced').hide(); jQuery('.simple').show();">
 			</td>
 		</tr>
 	</table>

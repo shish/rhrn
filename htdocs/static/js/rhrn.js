@@ -1,5 +1,7 @@
 function rhrn_init(div_name) {
 	// initialize the map on the "map" div with a given center and zoom
+	if($("#"+div_name).length == 0) return;
+
 	var map = new L.Map(div_name, {
 		center: new L.LatLng(51.5, -0.1),
 		zoom: 10
@@ -69,9 +71,11 @@ function rhrn_init(div_name) {
 				var comment = (el.content ? el.content : "(No comment)");
 				var commands = (
 					(rhrn_username == el.writer || rhrn_username == "Shish") ?
-					"<p><a href='#' onclick='delReview("+el.id+"); return false;'>Delete</a>" :
+					"<br><a href='#' onclick='delReview("+el.id+"); return false;'>Delete</a>" :
 					""
-				);
+				) +
+					"<br><a href='#' onclick='newReview(new L.LatLng("+el.lat+", "+el.lon+")); return false;'>Add your own view</a>"
+				;
 				var tags = [];
 				if(feq(el.volume, 0.0)) tags.push("Quiet");
 				if(feq(el.volume, 1.0)) tags.push("Loud");
@@ -82,13 +86,15 @@ function rhrn_init(div_name) {
 				m.bindPopup(
 					"<table class='review'><tr>"+
 						"<td class='writer'>"+
+							"<a href='/user/"+el.writer+"'>"+
 							"<img src='"+el.avatar+"'>"+
 							"<br>"+el.writer+
+							"</a>"+
 						"</td>"+
 						"<td>"+
 							comment+
-							"<p><i>"+el.date_posted+"</i>"+
-							(tags ? "<p>"+tags.join(", ") : "")+
+							"<br><i>"+el.date_posted+"</i>"+
+							(tags ? "<br>"+tags.join(", ") : "")+
 							commands+
 						"</td>"+
 					"</tr></table>"
@@ -238,4 +244,81 @@ function findLocal() {
 	else {
 		alert("Unable to find location: GPS not supported");
 	}
+}
+
+$(function() {
+	/* location search init */
+	if($("#loc_search").length >= 0) {
+		var input = document.getElementById('loc_search');
+		var autocomplete = new google.maps.places.Autocomplete(input);
+		google.maps.event.addListener(autocomplete, 'place_changed', function() {
+			var place = autocomplete.getPlace();
+			var loc = place.geometry.location;
+			var lat = loc.lat();
+			var lng = loc.lng();
+			setView(lat, lng);
+		});
+	}
+
+	/* heat toggle init */
+	$("#heat_toggle").change(function(e) {
+		var val = jQuery(this).is(":checked");
+		if(val) {
+			setHeat("happiness");
+		}
+		else {
+			setHeat(null);
+		}
+	});
+
+	/* tagline init */
+	var taglines = [
+		"Click the map to add your own nano-reviews",
+		"What's it like where you are?",
+		"Click to add your own nano-reviews!",
+		"What's cool in your neighbourhood?"
+	];
+	var tagline_id = 0;
+	setInterval(function() {
+		$("#tagline").fadeOut("slow", function() {
+			$("#tagline").html(taglines[++tagline_id % taglines.length]);
+			$("#tagline").fadeIn("slow");
+		});
+	}, 15000);
+
+	/* janrain init */
+    if (typeof window.janrain !== 'object') window.janrain = {};
+    if (typeof window.janrain.settings !== 'object') window.janrain.settings = {};
+    
+    janrain.settings.tokenUrl = 'http://www.ratehereratenow.com/dashboard/login';
+
+    function isReady() { janrain.ready = true; };
+    if (document.addEventListener) {
+      document.addEventListener("DOMContentLoaded", isReady, false);
+    } else {
+      window.attachEvent('onload', isReady);
+    }
+
+    var e = document.createElement('script');
+    e.type = 'text/javascript';
+    e.id = 'janrainAuthWidget';
+
+    if (document.location.protocol === 'https:') {
+      e.src = 'https://rpxnow.com/js/lib/rhrn/engage.js';
+    } else {
+      e.src = 'http://widget-cdn.rpxnow.com/js/lib/rhrn/engage.js';
+    }
+
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(e, s);
+
+	/* title hiding init */
+	if($.cookie("hide-tips") == "hide") {
+		$("#title").hide();
+	}
+});
+
+function hideTitle() {
+	$("#title").fadeOut();
+	$.cookie("hide-tips", "hide", {expires: 365});
 }

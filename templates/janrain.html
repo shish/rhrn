@@ -1,0 +1,14 @@
+$def with(name, email, jid, error="")
+
+<div class="form cot_new_user">
+	<h2>Confirm name / email</h2>
+	<form method="POST" action="/janrain">
+		$error
+		$if error:
+			<br>
+		<input type='hidden' name='token' value='$jid'>
+		<input type='text' name='name' placeholder="Username (Letters, numbers, no spaces)" required pattern="[A-Za-z0-9_-]+" value='$name'>
+		<input type='email' name='email' placeholder="Email" required value='$email'>
+		<br><input class="btn btn-primary" type="submit" value="Confirm">
+	</form>
+</div>

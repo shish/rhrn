@@ -9,6 +9,13 @@ import Image
 import colorsys
 import StringIO
 import os
+import logging
+import logging.handlers
+import ConfigParser
+import urllib2
+
+config = ConfigParser.SafeConfigParser()
+config.read("../app/rhrn.cfg")
 
 web.config.debug = True
 
@@ -21,10 +28,8 @@ urls = (
     '/review/(.*)', 'review',
 
     '/dashboard', 'dashboard',
-    '/dashboard/new', 'dashboard_new',
     '/dashboard/login', 'dashboard_login',
     '/dashboard/logout', 'dashboard_logout',
-    '/dashboard/reset', 'dashboard_reset',
 
     '/tiles/happiness/(.*)/(.*)/(.*).png', 'tiles',
 
@@ -37,7 +42,6 @@ app.add_processor(override_method)
 class User:
     def __init__(self, row):
         self.name = row.name
-        self.password = row.password
         self.email = row.email
         self.avatar = "http://www.gravatar.com/avatar/"+hashlib.md5(row.email).hexdigest()
 
@@ -107,12 +111,14 @@ class index:
             return render_mobile.index()
         else:
             i = web.input(lat=None, lon=None)
-            return render_bare.index(i.lat, i.lon)
+            return render.index(i.lat, i.lon)
+
 
 class about:
     def GET(self, page="about"):
         if page == "about":
             return render.about_about()
+
 
 class review:
     def GET(self, id=None):
@@ -196,51 +202,54 @@ class review:
 class dashboard:
     def GET(self):
         if session.user.name == "Anonymous":
-            raise web.seeother("/dashboard/login")
+            raise web.seeother("/")
         yays = model.get_reviews(writer=session.user.name, happy=True)
         nays = model.get_reviews(writer=session.user.name, happy=False)
         favs = model.get_reviews(writer=session.user.name, favourite=True)
         return render.dashboard(session.user.name, yays, nays, favs)
 
-class dashboard_new:
-    def GET(self):
-        return render.dashboard_new()
-
-    def POST(self):
-        inp = web.input(name=None, email=None, password1=None, password2=None)
-
-        if inp.password1 != inp.password2:
-            return render.dashboard_new(error="Passwords don't match")
-
-        if model.get_user(name=inp.name):
-            return render.dashboard_new(error="Username taken")
-
-        if model.get_user(email=inp.email):
-            return render.dashboard_new(error="A user already has that address")
-
-        model.new_user(inp.name, inp.email, inp.password1)
-        session.user = User(model.get_user(name=inp.name, password=inp.password1))
-
-        raise web.seeother("/")
-
 class dashboard_login:
-    def GET(self):
-        return render.dashboard_login()
-
     def POST(self):
-        inp = web.input(name=None, password=None, return_to="/dashboard")
+        inp = web.input(name=None, email=None, token=None)
 
-        if not inp.name or not inp.password:
-            return render.dashboard_login(inp.name, "Missing name or password")
+        # creating a new user
+        if inp.name and inp.email and inp.token:
+            ex = model.get_user(name=inp.name)
+            if ex:
+                return render.janrain(inp.name, inp.email, inp.token, "Username taken")
 
-        user = model.get_user(name=inp.name, password=inp.password)
+            ex = model.get_user(email=inp.email)
+            if ex:
+                return render.janrain(inp.name, inp.email, inp.token, "Email already in use")
 
-        if not user:
-            return render.dashboard_login(inp.name, "No user with those details")
+            model.new_user(inp.name, inp.email, token=inp.token)
 
-        session.user = User(user)
+            user = model.get_user(token=inp.token)
+            session.user = User(user)
+            raise web.seeother("/")
 
-        raise web.seeother("/")
+        # already got a user
+        elif inp.token:
+            data = urllib2.urlopen("https://rpxnow.com/api/v2/auth_info?apiKey=%s&token=%s" % (config.get("janrain", "apikey"), inp.token)).read()
+            resp = json.loads(data)
+            if resp['stat'] == "ok":
+                prof = resp['profile']
+                jid = prof['identifier']
+                user = model.get_user(token=jid)
+                user_mail = model.get_user(email=prof['email'], token='')
+                if user:
+                    model.set_user_meta_by_email(user.email, data)
+                    session.user = User(user)
+                    raise web.seeother("/")
+                elif user_mail:
+                    model.set_user_token_by_email(prof['email'], jid)
+                    model.set_user_meta_by_email(prof['email'], data)
+                    session.user = User(user_mail)
+                    raise web.seeother("/")
+                else:
+                    return render.janrain(prof.get('preferredUsername', ''), prof.get('email', ''), jid)
+            else:
+                return "Error logging in"
 
 class dashboard_logout:
     def GET(self):
@@ -252,34 +261,6 @@ class dashboard_logout:
         session.user = User(model.get_user(name="Anonymous"))
         raise web.seeother("/")
 
-class dashboard_reset:
-    def GET(self):
-        return render.dashboard_reset()
-
-    def POST(self):
-        inp = web.input(name=None, email=None)
-
-        if not inp.name and not inp.email:
-            return render.dashboard_reset(error="Missing name or email")
-
-        user = model.get_user(name=inp.name) or model.get_user(email=inp.email)
-
-        if not user or user.name == "Anonymous":
-            return render.dashboard_login(error="No user with those details")
-
-        pw = generate_password()
-        model.set_user_password(user.name, pw)
-        web.sendmail(
-            'Rate Here, Rate Now <shish+rhrn@shishnet.org>',
-            user.email,
-            '[RHRN] Password Reset',
-            "Your new password is "+pw+
-            "\n\nLog in at http://www.ratehereratenow.com/dashboard/login"+
-            "\n\nSee you in a moment!"+
-            "\n\n    -- The Rate Here, Rate Now Team"
-        )
-
-        return render.dashboard_reset_sent()
 
 def num2deg(xtile, ytile, zoom):
     n = 2.0 ** zoom
@@ -295,10 +276,10 @@ class tiles:
         if os.path.exists(cache_file):
             return file(cache_file).read()
 
-        (lat0, lon0) = num2deg(int(x)-1, int(y)-1, int(zoom))
-        (lat1, lon1) = num2deg(int(x),   int(y),   int(zoom))
-        (lat2, lon2) = num2deg(int(x)+1, int(y)+1, int(zoom))
-        (lat3, lon3) = num2deg(int(x)+2, int(y)+2, int(zoom))
+        (lat0, lon0) = num2deg(int(x)-1, int(y)+2, int(zoom))
+        (lat1, lon1) = num2deg(int(x),   int(y)+2, int(zoom))
+        (lat2, lon2) = num2deg(int(x)+1, int(y),   int(zoom))
+        (lat3, lon3) = num2deg(int(x)+2, int(y)-1, int(zoom))
         (latd, lond) = (abs(lat1-lat2), abs(lon1-lon2))
 
         rs = list(model.get_reviews(bbox=[
@@ -307,21 +288,27 @@ class tiles:
         ]))
 
         im = Image.new('RGBA', (256, 256))
+        pix = im.load()
 
+        logging.info("Generating tile based on %d reviews" % len(rs))
         if rs:
             for x in range(0, 256):
                 for y in range(0, 256):
-                    lat = lat1 + (lat2-lat1) * y/256
-                    lon = lon1 + (lon2-lon1) * x/256
+                    lat = lat1 + latd * float(256-y)/256
+                    lon = lon1 + lond * float(x)/256
                     goodness = 0
                     badness = 0
                     for r in rs:
-                        d = math.sqrt(math.pow(lat-r.lat, 2) + math.pow(lon-r.lon, 2))
-                        if d < 0.001:
+                        d = math.sqrt(math.pow((lat-r.lat)/latd, 2) + math.pow((lon-r.lon)/lond, 2))
+                        if d < 1:
                             if r.happy:
-                                goodness = goodness + (0.001 - d) * 1000
+                                goodness = goodness + (1-d)
                             else:
-                                badness = badness + (0.001 - d) * 1000
+                                badness = badness + (1-d)
+                            #if r.happy:
+                            #    goodness = goodness + (0.001 - d) * 1000
+                            #else:
+                            #    badness = badness + (0.001 - d) * 1000
                     good_hue = 2.0/6
                     bad_hue = 0.0/6
                     mid = (good_hue + bad_hue) / 2
@@ -331,15 +318,11 @@ class tiles:
                     else:
                         ratio = (goodness - badness) / (goodness + badness)
                         hue = mid + mid * ratio
-                        alp = 63 * min(1, max(goodness, badness))
+                        alp = 63 * clamp(0, max(goodness, badness)/2, 1)
                     sat = 1
                     val = 1
                     (r, g, b) = colorsys.hsv_to_rgb(hue, sat, val)
-                    im.putpixel(
-                        (x, y),
-                        (r*256, g*256, b*256, alp)
-                        #(x, y, x, y)
-                    )
+                    pix[x, y] = (int(r*256), int(g*256), int(b*256), int(alp))
 
         buf = StringIO.StringIO()
         im.save(buf, format= 'PNG')
@@ -349,4 +332,15 @@ class tiles:
         return buf.getvalue()
 
 if __name__ == "__main__":
+    logging.basicConfig(
+            level=logging.DEBUG,
+            format='%(asctime)s %(levelname)-8s %(message)s',
+            filename="../logs/app.log")
+    smtp = logging.handlers.SMTPHandler(
+            "localhost", "noreply@shishnet.org",
+            ["shish+rhrn@shishnet.org", ], "rhrn error report")
+    smtp.setLevel(logging.WARNING)
+    logging.getLogger('').addHandler(smtp)
+
+    logging.info("App starts...")
     app.run()

@@ -18,35 +18,44 @@ db = web.database(
 # ============================================================================
 # users
 
-def get_user(name=None, email=None, password=None):
+def new_user(name, email, token):
+    db.insert('rh_user',
+        name=name,
+        email=email,
+        token=token
+    )
+
+def get_user(name=None, email=None, token=None):
     wheres = []
     if name is not None:
         wheres.append("(lower(name) = lower($name))")
     if email is not None:
         wheres.append("(lower(email) = lower($email))")
+    if token is not None:
+        wheres.append("(token = $token)")
 
-    users = db.select('rh_user',
+    users = list(db.select('rh_user',
         where=" AND ".join(wheres),
         vars=locals()
-    )
+    ))
 
-    if users and (password is None or webutil.pwmatch(password, users[0].password)):
+    if users:
         return users[0]
     else:
         return None
 
-def new_user(name, email, password):
-    db.insert('rh_user',
-        name=name,
-        email=email,
-        password=webutil.hashpw(password)
+def set_user_token_by_email(email, token):
+    db.update('rh_user',
+        where="email = $email",
+        vars=locals(),
+        token=token
     )
 
-def set_user_password(name, password):
+def set_user_meta_by_email(email, meta):
     db.update('rh_user',
-        where="name=$name",
-        vars={'name': name},
-        password=webutil.hashpw(password)
+        where="email = $email",
+        vars=locals(),
+        janrain_meta=meta
     )
 
 

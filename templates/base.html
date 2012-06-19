@@ -8,14 +8,19 @@ $def with (page)
 		<meta name="description" content="Nano-reviews of everything, everywhere">
 		<meta name="author" content="Shish">
 
+		<meta property="og:title" content="Rate Here, Rate Now">
+		<meta property="og:description" content="Nano-reviews of everything, everywhere">
+		<meta property="og:image" content="http://www.ratehereratenow.com/static/img/happy256.png">
+		<meta property="og:url" content="http://www.ratehereratenow.com/">
+
 		<!-- Le styles -->
 		<link href="/static/css/bootstrap.css" rel="stylesheet">
-		<link href="/static/css/rhrn-site.css" rel="stylesheet">
+		<link href="/static/css/rhrn.css" rel="stylesheet">
 		<link href="/static/css/bootstrap-responsive.css" rel="stylesheet">
 
-		<link rel="stylesheet" href="/static/leaflet/dist/leaflet.css" />
+		<link rel="stylesheet" href="http://code.leafletjs.com/leaflet-0.3.1/leaflet.css" />
 		<!--[if lte IE 8]>
-		    <link rel="stylesheet" href="/static/leaflet/dist/leaflet.ie.css" />
+		    <link rel="stylesheet" href="http://code.leafletjs.com/leaflet-0.3.1/leaflet.ie.css" />
 		<![endif]-->
 
 		<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -34,64 +39,90 @@ $def with (page)
 	<body>
 		<div class="navbar navbar-fixed-top">
 			<div class="navbar-inner">
+			$if page.get("fullscreen", False):
+				<div class="container-fluid">
+			$else:
 				<div class="container">
+			$#endif
 					<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</a>
 					<a class="brand" href="/">Rate Here, Rate Now</a>
-					$if session.user.name == "Anonymous":
-						<div class="btn-group pull-right">
-							<a class="btn" href="/dashboard/login">
-								<i class="icon-user"></i> $session.user.name
-								<span class="caret"></span>
-							</a>
-						</div>
-					$else:
-						<div class="btn-group pull-right">
-							<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-								$if session.user.avatar:
-									<img src="$session.user.avatar" width="14" height="14" />
-								$else:
-									<i class="icon-user"></i>
-								$session.user.name
-								<span class="caret"></span>
-							</a>
-							<ul class="dropdown-menu">
-								<li><a href="/dashboard"><i class="icon-home"></i> Dashboard</a></li>
-								<!--
-								<li><a href="/user/$session.user.name"><i class="icon-user"></i> Profile</a></li>
-								<li><a href="/settings"><i class="icon-wrench"></i> Settings</a></li>
-								-->
-								<li class="divider"></li>
-								<form action="/dashboard/logout" method="POST" id="logout_form" style="margin-bottom: 0px;">
-								</form>
-								<li><a href="#" onclick="$$('#logout_form').submit(); return false;"><i class="icon-off"></i> Sign Out</a></li>
-							</ul>
-						</div>
-					<!-- endif -->
-					<!--
-					<div class="nav-collapse>
-						<ul class="nav">
-						$if session.user.name == "Anonymous":
-							<li><a href="/">Home</a></li>
-						$else:
-							<li><a href="/dashboard">Home</a></li>
-						$#endif
-							<li><a href="/about/get-started">Get Started</a></li>
+				$if session.user.name == "Anonymous":
+					<div class="btn-group pull-right">
+						<a class="btn janrainEngage" href="#">
+							<i class="icon-user"></i> Sign In
+							<span class="caret"></span>
+						</a>
+					</div>
+				$else:
+					<div class="btn-group pull-right">
+						<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+							$if session.user.avatar:
+								<img src="$session.user.avatar" width="14" height="14" />
+							$else:
+								<i class="icon-user"></i>
+							$session.user.name
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu">
+							<li><a href="/dashboard"><i class="icon-home"></i> Dashboard</a></li>
+							<!--
+							<li><a href="/user/$session.user.name"><i class="icon-user"></i> Profile</a></li>
+							<li><a href="/settings"><i class="icon-wrench"></i> Settings</a></li>
+							-->
+							<li class="divider"></li>
+							<form action="/dashboard/logout" method="POST" id="logout_form" style="margin-bottom: 0px;">
+							</form>
+							<li><a href="#" onclick="$$('#logout_form').submit(); return false;"><i class="icon-off"></i> Sign Out</a></li>
 						</ul>
 					</div>
-					-->
-					<!--/.nav-collapse -->
+				$#endif
+				$if page.get("search", False):
+					<form class="navbar-form pull-right">
+						<input type="text" placeholder="Search for a location" id="loc_search" style="width: 20em;">
+					</form>
+				$#endif
+					<div class="nav-collapse">
+						<ul class="nav">
+							<li><a href="http://m.ratehereratenow.com">Mobile</a></li>
+							<li><a href="/about">About</a></li>
+							<!--
+							<li>Filter: <select id="filter" onchange="refreshMap();">
+								<option value="all">All reviews</option>
+								<option value="notanon">Non-anonymous</option>
+							$if session.user.name != "Anonymous":
+								<option value="my">My reviews</option>
+								<option value="notme">Everyone else's</option>
+							$#endif
+							</select></li>
+							-->
+						$if page.get("tweet", False):
+							<li>&nbsp;&nbsp;<span style="position: relative; top: 8px;">
+								<a href="https://twitter.com/share" data-text="Nano-reviews for your area; rate here, rate now -" data-related="shish2k:Site programmer" class="twitter-share-button" data-lang="en">Tweet</a>
+								<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+							</span></li>
+						$#endif
+						</ul>
+					</div><!--/.nav-collapse -->
+				$if session.user.name == "Shish":
+					<form class="navbar-form pull-left">
+						<label>
+							<input type="checkbox" id="heat_toggle">
+							Heat Map
+						</label>
+					</form>
+				$#endif
 				</div>
 			</div>
 		</div>
 
-		<div class="container">
+		<div class="container body">
 		$for type, msg in session.flash:
 			<div class="alert alert-$type">
-				<a class="close" data-dismiss="alert" href="#">×</a>
+				<a class="close" data-dismiss="alert" href="#">X</a>
 				<!--<h4 class="alert-heading">Warning!</h4>-->
 				$msg
 			</div>
@@ -99,6 +130,7 @@ $def with (page)
 
 			$:page
 
+		$if not page.get("fullscreen", False):
 			<div class="row">
 				<div class="span12">
 					<hr>
@@ -108,27 +140,36 @@ $def with (page)
 					</footer>
 				</div>
 			</div>
+		$#endif
 		</div><!--/.fluid-container-->
 
 		<!-- Le javascript
 		================================================== -->
 		<!-- Placed at the end of the document so the pages load faster -->
 		<script src="/static/js/jquery.js"></script>
+		<script src="/static/js/jquery.cookie.js"></script>
 
+		<!--
 		<script src="/static/js/bootstrap-transition.js"></script>
 		<script src="/static/js/bootstrap-alert.js"></script>
 		<script src="/static/js/bootstrap-modal.js"></script>
+		-->
 		<script src="/static/js/bootstrap-dropdown.js"></script>
+		<!--
 		<script src="/static/js/bootstrap-scrollspy.js"></script>
 		<script src="/static/js/bootstrap-tab.js"></script>
 		<script src="/static/js/bootstrap-tooltip.js"></script>
 		<script src="/static/js/bootstrap-popover.js"></script>
+		-->
 		<script src="/static/js/bootstrap-button.js"></script>
+		<!--
 		<script src="/static/js/bootstrap-collapse.js"></script>
 		<script src="/static/js/bootstrap-carousel.js"></script>
 		<script src="/static/js/bootstrap-typeahead.js"></script>
+		-->
 
-		<script src="/static/leaflet/dist/leaflet-src.js"></script>
+		<script src="http://code.leafletjs.com/leaflet-0.3.1/leaflet.js"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=places" type="text/javascript"></script>
 		<script src="/static/js/rhrn.js"></script>
 		<script>
 var rhrn_username = "$session.user.name";

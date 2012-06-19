@@ -1,105 +1,17 @@
 $def with(lat, lon)
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>Rate Here, Rate Now</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<meta name="description" content="Nano-reviews of everything, everywhere">
-		<meta name="author" content="Shish">
 
-		<link rel="stylesheet" href="/static/leaflet/dist/leaflet.css" />
-		<!--[if lte IE 8]>
-		    <link rel="stylesheet" href="/static/leaflet/dist/leaflet.ie.css" />
-		<![endif]-->
-		<link rel="stylesheet" href="/static/css/rhrn-site.css" />
+$var search = True
+$var tweet = True
+$var fullscreen = True
 
-		<link rel="shortcut icon" href="/static/ico/favicon.ico">
-		<link rel="canonical" href="http://www.ratehereratenow.com/" />
-	</head>
-	<body onload="rhrn_init('map');">
-		<div id="map" class="full"></div>
-		<div id="title">
-			<h1>&nbsp;Rate Here, Rate Now&nbsp;</h1>
-			<!--What's cool in your neighbourhood?-->
-			<span id="tagline">Click the map to add your own nano-reviews</span>
-		</div>
-		<div id="search">
-			<input type="text" placeholder="Search for a location" id="loc_search" style="width: 30em;">
-		</div>
-		<div id="links">
-		$if session.user.name == "Anonymous":
-			<a href="/dashboard/login">Log In</a> /
-			<a href="/dashboard/new">Create Account</a> /
-		$else:
-			<img src="$session.user.get_avatar(14)"> <a href="/dashboard">$session.user.name</a> /
-		$#endif
-			<a href="/about">About RHRN</a> /
-			<a href="http://m.ratehereratenow.com">Mobile view</a> /
-			Filter:
-			<select id="filter" onchange="refreshMap();">
-				<option value="all">All reviews</option>
-				<option value="notanon">Non-anonymous</option>
-			$if session.user.name != "Anonymous":
-				<option value="my">My reviews</option>
-				<option value="notme">Everyone else's</option>
-			$#endif
-			</select> / 
-			<span style="position: relative; top: 5px;">
-				<a href="https://twitter.com/share" data-text="Nano-reviews for your area; rate here, rate now -" data-related="shish2k:Site programmer" class="twitter-share-button" data-lang="en">Tweet</a>
-				<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-			</span>
-		$if session.user.name == "Shish":
-			/
-			<label>
-				<input type="checkbox" id="heat_toggle">
-				Heat Map
-			</label>
-		$#endif
-		</div>
+<div id="map" class="full"></div>
+<div id="title">
+	<span class="holder">
+		<span id="tagline">Click the map to add your own nano-reviews</span>
+		<a href="#" onclick="hideTitle();">X</a>
+	</span>
+</div>
 
-		<script>
-var rhrn_username = "$session.user.name";
+<script>
 var rhrn_initpos = [$lat, $lon];
-		</script>
-		<script src="/static/leaflet/dist/leaflet-src.js"></script>
-		<script src="/static/js/jquery.js"></script>
-		<script src="/static/js/rhrn.js"></script>
-		<script src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=places" type="text/javascript"></script>
-
-		<script>
-		var input = document.getElementById('loc_search');
-		var autocomplete = new google.maps.places.Autocomplete(input);
-		google.maps.event.addListener(autocomplete, 'place_changed', function() {
-			var place = autocomplete.getPlace();
-			var loc = place.geometry.location;
-			var lat = loc.lat();
-			var lng = loc.lng();
-			setView(lat, lng);
-		});
-
-		jQuery(function() {
-			jQuery("#heat_toggle").change(function(e) {
-				var val = jQuery(this).is(":checked");
-				if(val) {
-					setHeat("happiness");
-				}
-				else {
-					setHeat(null);
-				}
-			});
-
-			var taglines = [
-				"Click the map to add your own nano-reviews",
-				"What's it like where you are?",
-				"Click to add your own nano-reviews!"
-				"What's cool in your neighbourhood?",
-			];
-			var tagline_id = 0;
-			setInterval(function() {
-				jQuery("#tagline").html(taglines[++tagline_id % taglines.length]);
-			}, 15000);
-		});
-		</script>
-	</body>
-</html>
+</script>

@@ -4,7 +4,6 @@ import hashlib
 import random
 import re
 import math
-import bcrypt
 
 
 def override_method(handler):
@@ -26,21 +25,6 @@ class DefaultingSession(web.session.Session):
         else:
             if web.cookies().get(cookie_name):
                 web.setcookie(cookie_name, self.session_id, expires=-1, domain=cookie_domain)
-
-
-def hashpw(password):
-    return bcrypt.hashpw(password, bcrypt.gensalt())
-
-def pwmatch(password, digest):
-    return bcrypt.hashpw(password, digest) == digest
-
-
-def generate_password():
-    choices = "235679abcdefghkmnpqrstuvwxyz"
-    pw = ""
-    for n in range(0, 8):
-        pw = pw + random.choice(choices)
-    return pw
 
 
 def shorten_url(url):
@@ -69,3 +53,13 @@ def ll_to_metric(lon1, lat1, lon2, lat2):
         return "%dm" % (d*1000)
     else:
         return "%.2fkm" % d
+
+
+def clamp(a, val, b):
+    low = min(a, b)
+    high = max(a, b)
+    if val < low:
+        val = low
+    if val > high:
+        val = high
+    return val
