@@ -31,6 +31,8 @@ urls = (
     '/dashboard/login', 'dashboard_login',
     '/dashboard/logout', 'dashboard_logout',
 
+    '/user/(.*)', 'user',
+
     '/tiles/happiness/(.*)/(.*)/(.*).png', 'tiles',
 
     '', ''
@@ -260,6 +262,14 @@ class dashboard_logout:
     def POST(self):
         session.user = User(model.get_user(name="Anonymous"))
         raise web.seeother("/")
+
+
+class user:
+    def GET(self, name="Anonymous"):
+        yays = model.get_reviews(writer=name, happy=True)
+        nays = model.get_reviews(writer=name, happy=False)
+        favs = model.get_reviews(writer=name, favourite=True)
+        return render.dashboard(name, yays, nays, favs)
 
 
 def num2deg(xtile, ytile, zoom):
