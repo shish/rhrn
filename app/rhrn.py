@@ -253,6 +253,8 @@ class dashboard_login:
             else:
                 return "Error logging in"
 
+        return "Missing token"
+
 class dashboard_logout:
     def GET(self):
         # FIXME: used by mobile
