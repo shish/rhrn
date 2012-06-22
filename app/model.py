@@ -92,7 +92,7 @@ def get_reviews(bbox=None, writer=None, happy=None, favourite=None, notwriter=No
     return db.select('rh_review',
         where=" AND ".join(wheres),
         order="date_posted DESC",
-        limit=100,
+        limit=500,
         vars=locals()
     )
 
