@@ -83,22 +83,20 @@ $def with (page)
 				$if page.get("search", False):
 					<form class="navbar-form pull-right">
 						<input type="text" placeholder="Search for a location" id="loc_search" style="width: 20em;">
+						<select id="filter" onchange="refreshMap();" style="width: 10em;">
+							<option value="all">All reviews</option>
+							<option value="notanon">Non-anonymous</option>
+						$if session.user.name != "Anonymous":
+							<option value="my">My reviews</option>
+							<option value="notme">Everyone else's</option>
+						$#endif
+						</select>
 					</form>
 				$#endif
 					<div class="nav-collapse">
 						<ul class="nav">
 							<li><a href="http://m.ratehereratenow.com">Mobile</a></li>
 							<li><a href="/about">About</a></li>
-							<!--
-							<li>Filter: <select id="filter" onchange="refreshMap();">
-								<option value="all">All reviews</option>
-								<option value="notanon">Non-anonymous</option>
-							$if session.user.name != "Anonymous":
-								<option value="my">My reviews</option>
-								<option value="notme">Everyone else's</option>
-							$#endif
-							</select></li>
-							-->
 						$if page.get("tweet", False):
 							<li>&nbsp;&nbsp;<span style="position: relative; top: 8px;">
 								<a href="https://twitter.com/share" data-text="Nano-reviews for your area; rate here, rate now -" data-related="shish2k:Site programmer" class="twitter-share-button" data-lang="en">Tweet</a>
@@ -173,9 +171,6 @@ $def with (page)
 		<script src="/static/js/rhrn.js"></script>
 		<script>
 var rhrn_username = "$session.user.name";
-$$(function() {
-	rhrn_init('map');
-});
 		</script>
 	</body>
 </html>
