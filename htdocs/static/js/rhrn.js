@@ -247,8 +247,16 @@ function findLocal() {
 }
 
 $(function() {
+	/* title hiding init */
+	if($.cookie("hide-tips") == "hide") {
+		$("#title").hide();
+	}
+
+	/* main map init */
+	rhrn_init('map');
+
 	/* location search init */
-	if($("#loc_search").length >= 0) {
+	if($("#loc_search").length >= 0 && window.google) {
 		var input = document.getElementById('loc_search');
 		var autocomplete = new google.maps.places.Autocomplete(input);
 		google.maps.event.addListener(autocomplete, 'place_changed', function() {
@@ -290,7 +298,12 @@ $(function() {
     if (typeof window.janrain !== 'object') window.janrain = {};
     if (typeof window.janrain.settings !== 'object') window.janrain.settings = {};
     
-    janrain.settings.tokenUrl = 'http://www.ratehereratenow.com/dashboard/login';
+	if (document.location.hostname[0] == "m") {
+		janrain.settings.tokenUrl = 'http://m.ratehereratenow.com/dashboard/login';
+	}
+	else {
+		janrain.settings.tokenUrl = 'http://www.ratehereratenow.com/dashboard/login';
+	}
 
     function isReady() { janrain.ready = true; };
     if (document.addEventListener) {
@@ -311,11 +324,6 @@ $(function() {
 
     var s = document.getElementsByTagName('script')[0];
     s.parentNode.insertBefore(e, s);
-
-	/* title hiding init */
-	if($.cookie("hide-tips") == "hide") {
-		$("#title").hide();
-	}
 });
 
 function hideTitle() {
