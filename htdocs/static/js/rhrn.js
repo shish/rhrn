@@ -92,7 +92,7 @@ function rhrn_init(div_name) {
 							"</a>"+
 						"</td>"+
 						"<td>"+
-							comment+
+							$("<div/>").text(comment).html()+
 							"<br><i>"+el.date_posted+"</i>"+
 							(tags ? "<br>"+tags.join(", ") : "")+
 							commands+
