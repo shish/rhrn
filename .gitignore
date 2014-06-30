@@ -7,3 +7,5 @@ app/flup
 app/web
 htdocs/cache
 run/supervise
+venv/
+images-old/

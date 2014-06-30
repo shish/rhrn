@@ -1,11 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import web
 from webutil import *
 import model
 import json
 import math
-import Image
+from PIL import Image
 import colorsys
 import StringIO
 import os
@@ -34,8 +34,6 @@ urls = (
     '/user/(.*)', 'user',
 
     '/tiles/happiness/(.*)/(.*)/(.*).png', 'tiles',
-
-    '', ''
 )
 app = web.application(urls, globals())
 app.add_processor(override_method)
@@ -65,7 +63,8 @@ class Review:
 
 if web.config.get('_session') is None:
     import rediswebpy
-    session = DefaultingSession(app, rediswebpy.RedisStore(prefix='session:rhrn:'), {
+    #session = DefaultingSession(app, rediswebpy.RedisStore(prefix='session:rhrn:'), {
+    session = DefaultingSession(app, rediswebpy.RedisStore(), {
         'user': User(model.get_user(name="Anonymous")),
         'flash': [],
     })
@@ -238,12 +237,14 @@ class dashboard_login:
                 prof = resp['profile']
                 jid = prof['identifier']
                 user = model.get_user(token=jid)
-                user_mail = model.get_user(email=prof['email'], token='')
+                user_mail = model.get_user(email=prof.get('email'), token='')
                 if user:
+                    # this janrain ID is in our system
                     model.set_user_meta_by_email(user.email, data)
                     session.user = User(user)
                     raise web.seeother("/")
-                elif user_mail:
+                elif prof.get("email") and user_mail:
+                    # they used a new account with known email
                     model.set_user_token_by_email(prof['email'], jid)
                     model.set_user_meta_by_email(prof['email'], data)
                     session.user = User(user_mail)

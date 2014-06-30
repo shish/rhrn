@@ -2,7 +2,8 @@ $def with(name, email, jid, error="")
 
 <div class="form cot_new_user">
 	<h2>Confirm name / email</h2>
-	<form method="POST" action="/dashboard/login">
+	<p>(Your email will be used to look up an avatar on <a href="http://gravatar.com">gravatar.com</a>)
+	<p><form method="POST" action="/dashboard/login">
 		$error
 		$if error:
 			<br>

@@ -1,0 +1,14 @@
+[Unit]
+Description=ShishNet RateHereRateNow
+
+[Service]
+ExecStart=/data/sites/ratehereratenow.com/run/run
+Restart=always
+Sockets=/tmp/fcgi-rhrn.sock
+
+Type=notify
+NotifyAccess=all
+WatchdogSec=60
+
+[Install]
+WantedBy=multi-user.target

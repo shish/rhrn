@@ -30,22 +30,38 @@ function rhrn_init(div_name) {
 		newReview(e.latlng);
 	});
 
-	var FaceIcon = L.Icon.extend({
+	var happyIcon = new L.Icon({
 		iconUrl: "/static/img/happy.png",
-		//shadowUrl: '../docs/images/leaf-shadow.png',
-		shadowUrl: null,
-		iconSize: new L.Point(32, 32),
-		//shadowSize: new L.Point(68, 95),
-		iconAnchor: new L.Point(16, 16),
-		popupAnchor: new L.Point(0, -16)
+		iconSize: [32, 32],
+		iconAnchor: [16, 16],
+		popupAnchor: [0, -16]
 	});
-	var happyIcon = new FaceIcon("/static/img/happy.png");
-	var sadIcon = new FaceIcon("/static/img/sad.png");
+	var sadIcon = new L.Icon({
+		iconUrl: "/static/img/sad.png",
+		iconSize: [32, 32],
+		iconAnchor: [16, 16],
+		popupAnchor: [0, -16]
+	});
 
 	var oldMarkers = [];
 	var newMarkers = [];
 	var markers = new L.LayerGroup();
 	map.addLayer(markers);
+
+	var oms = new OverlappingMarkerSpiderfier(map, {keepSpiderfied: true});
+	var popup = new L.Popup({closeButton: true, offset: new L.Point(0, -8)});
+	oms.addListener('click', function(marker) {
+			popup.setContent(marker.desc);
+			popup.setLatLng(marker.getLatLng());
+			map.openPopup(popup);
+			});
+	oms.addListener('spiderfy', function(markers) {
+			//for (var i = 0, len = markers.length; i < len; i ++) markers[i].setIcon(new lightIcon());
+			map.closePopup();
+			});
+	oms.addListener('unspiderfy', function(markers) {
+			//for (var i = 0, len = markers.length; i < len; i ++) markers[i].setIcon(new darkIcon());
+			});
 
 	var lastBBox;
 	function loadReviews(bbox) {
@@ -66,7 +82,7 @@ function rhrn_init(div_name) {
 					return;
 				}
 
-				var m = new L.Marker(new L.LatLng(el.lat, el.lon));
+				var m = new L.Marker([el.lat, el.lon]);
 				m.setIcon(el.happy ? happyIcon : sadIcon);
 				var comment = (el.content ? el.content : "(No comment)");
 				var commands = (
@@ -83,7 +99,7 @@ function rhrn_init(div_name) {
 				if(feq(el.danger, 1.0)) tags.push("Dangerous");
 				if(feq(el.crowds, 0.0)) tags.push("Empty");
 				if(feq(el.crowds, 1.0)) tags.push("Crowded");
-				m.bindPopup(
+				var desc = (
 					"<table class='review'><tr>"+
 						"<td class='writer'>"+
 							"<a href='/user/"+el.writer+"'>"+
@@ -99,8 +115,15 @@ function rhrn_init(div_name) {
 						"</td>"+
 					"</tr></table>"
 				);
+				if(oms) {
+					m.desc = desc;
+				}
+				else {
+					m.bindPopup(desc);
+				}
 				newMarkers["i"+el.id] = m;
 				markers.addLayer(m);
+				if(oms) oms.addMarker(m);
 			});
 
 			//console.log("current", oldMarkers);
@@ -109,6 +132,7 @@ function rhrn_init(div_name) {
 				if(oldMarkers.hasOwnProperty(id)) {
 					if(!newMarkers.hasOwnProperty(id)) {
 						markers.removeLayer(oldMarkers[id]);
+						if(oms) oms.removeMarker(oldMarkers[id]);
 						delete oldMarkers[id];
 					}
 				}

@@ -134,43 +134,37 @@ $def with (page)
 					<hr>
 
 					<footer>
-						<p>&copy; Shish 2012</p>
+						<p>RHRN Software &copy; Shish 2013;
+						review data <a href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_GB">CC-BY-SA</a></p>
 					</footer>
 				</div>
 			</div>
 		$#endif
 		</div><!--/.fluid-container-->
 
-		<!-- Le javascript
-		================================================== -->
-		<!-- Placed at the end of the document so the pages load faster -->
 		<script src="/static/js/jquery.js"></script>
 		<script src="/static/js/jquery.cookie.js"></script>
-
-		<!--
-		<script src="/static/js/bootstrap-transition.js"></script>
-		<script src="/static/js/bootstrap-alert.js"></script>
-		<script src="/static/js/bootstrap-modal.js"></script>
-		-->
 		<script src="/static/js/bootstrap-dropdown.js"></script>
-		<!--
-		<script src="/static/js/bootstrap-scrollspy.js"></script>
-		<script src="/static/js/bootstrap-tab.js"></script>
-		<script src="/static/js/bootstrap-tooltip.js"></script>
-		<script src="/static/js/bootstrap-popover.js"></script>
-		-->
 		<script src="/static/js/bootstrap-button.js"></script>
-		<!--
-		<script src="/static/js/bootstrap-collapse.js"></script>
-		<script src="/static/js/bootstrap-carousel.js"></script>
-		<script src="/static/js/bootstrap-typeahead.js"></script>
-		-->
-
 		<script src="/static/js/leaflet.js"></script>
+		<script src="/static/js/oms.min.js"></script>
 		<script src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=places" type="text/javascript"></script>
 		<script src="/static/js/rhrn.js"></script>
 		<script>
 var rhrn_username = "$session.user.name";
+		</script>
+		<script type="text/javascript">
+			var _gaq = _gaq || [];
+			_gaq.push(['_setAccount', 'UA-40520144-1']);
+			_gaq.push(['_setDomainName', 'ratehereratenow.com']);
+			_gaq.push(['_setAllowLinker', true]);
+			_gaq.push(['_trackPageview']);
+
+			(function() {
+				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+			})();
 		</script>
 	</body>
 </html>
