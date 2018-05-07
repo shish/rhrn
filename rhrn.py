@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import web
+web.config.debug = False
+
 from webutil import *
 import model
 import json
@@ -13,14 +15,14 @@ import logging
 import logging.handlers
 import ConfigParser
 import urllib2
+import os
 
-config = ConfigParser.SafeConfigParser()
-config.read("../app/rhrn.cfg")
-
-web.config.debug = True
+JANRAIN_KEY = os.environ['JANRAIN_KEY']
 
 urls = (
     '/', 'index',
+    '/static/(.*)', 'static',
+
     '/about', 'about',
     '/about/(.*)', 'about',
 
@@ -61,16 +63,12 @@ class Review:
         return d
 
 
-if web.config.get('_session') is None:
-    import rediswebpy
-    #session = DefaultingSession(app, rediswebpy.RedisStore(prefix='session:rhrn:'), {
-    session = DefaultingSession(app, rediswebpy.RedisStore(), {
-        'user': User(model.get_user(name="Anonymous")),
-        'flash': [],
-    })
-    web.config._session = session
-else:
-    session = web.config._session
+session = web.session.Session(
+    app,
+    web.session.DBStore(model.db, 'sessions'),
+    initializer={'user': User(model.get_user(name="Anonymous")), 'flash': []}
+)
+
 
 def flash(type, msg):
     session.flash.append((type, msg))
@@ -78,7 +76,7 @@ def flash(type, msg):
 def flash_clear():
     session.flash = []
 
-render_bare = web.template.render('../templates', globals={
+render_bare = web.template.render('./templates', globals={
     'session': session,
     'shorten_url': shorten_url,
     'shorten_datetime': shorten_datetime,
@@ -86,7 +84,7 @@ render_bare = web.template.render('../templates', globals={
     'flash_clear': flash_clear,
     'urlquote': web.urlquote
 })
-render_mobile = web.template.render('../templates/mobile', base='base', globals={
+render_mobile = web.template.render('./templates/mobile', base='base', globals={
     'session': session,
     'shorten_url': shorten_url,
     'shorten_datetime': shorten_datetime,
@@ -95,7 +93,7 @@ render_mobile = web.template.render('../templates/mobile', base='base', globals=
     'urlquote': web.urlquote,
     'll_to_metric': ll_to_metric
 })
-render = web.template.render('../templates', base='base', globals={
+render = web.template.render('./templates', base='base', globals={
     'session': session,
     'shorten_url': shorten_url,
     'shorten_datetime': shorten_datetime,
@@ -113,6 +111,14 @@ class index:
         else:
             i = web.input(lat=None, lon=None)
             return render.index(i.lat, i.lon)
+
+
+class static:
+    def GET(self, filename):
+        try:
+            return file("static/"+filename).read()
+        except:
+            return "not found"
 
 
 class about:
@@ -231,7 +237,7 @@ class dashboard_login:
 
         # already got a user
         elif inp.token:
-            data = urllib2.urlopen("https://rpxnow.com/api/v2/auth_info?apiKey=%s&token=%s" % (config.get("janrain", "apikey"), inp.token)).read()
+            data = urllib2.urlopen("https://rpxnow.com/api/v2/auth_info?apiKey=%s&token=%s" % (JANRAIN_KEY, inp.token)).read()
             resp = json.loads(data)
             if resp['stat'] == "ok":
                 prof = resp['profile']
@@ -346,14 +352,9 @@ class tiles:
 
 if __name__ == "__main__":
     logging.basicConfig(
-            level=logging.DEBUG,
-            format='%(asctime)s %(levelname)-8s %(message)s',
-            filename="../logs/app.log")
-    smtp = logging.handlers.SMTPHandler(
-            "localhost", "noreply@shishnet.org",
-            ["shish+rhrn@shishnet.org", ], "rhrn error report")
-    smtp.setLevel(logging.WARNING)
-    logging.getLogger('').addHandler(smtp)
-
+        level=logging.DEBUG,
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        # filename="../logs/app.log",
+    )
     logging.info("App starts...")
     app.run()

@@ -2,16 +2,16 @@ import web
 import time
 import hashlib
 import webutil
-import ConfigParser
+import os, urlparse
 
-config = ConfigParser.SafeConfigParser()
-config.read("../app/rhrn.cfg")
-
+db_info = urlparse.urlparse(os.environ['DB_DSN'])
 db = web.database(
-    dbn  = config.get("database", "dbn"),
-    db   = config.get("database", "db"),
-    user = config.get("database", "user"),
-    pw   = config.get("database", "pw")
+    dbn=db_info.scheme,
+    host=db_info.hostname,
+    port=db_info.port,
+    db=db_info.path.strip("/"),
+    user=db_info.username,
+    pw=db_info.password,
 )
 
 
